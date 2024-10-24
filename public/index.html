@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <h1>User Registration</h1>
+    
+    <!-- User Registration Form -->
+    <form id="userForm">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" required title="Please enter your first name.">
+    
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" required title="Please enter your last name.">
+    
+        <label for="mobileNo">Mobile No:</label>
+        <input type="text" id="mobileNo" name="mobileNo" pattern="\d{10}" required title="Please enter a valid 10-digit mobile number.">
+    
+        <label for="email">Email ID:</label>
+        <input type="email" id="email" name="email" required title="Please enter a valid email address.">
+    
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" title="Please enter your address.">
+    
+        <label for="street">Street:</label>
+        <input type="text" id="street" name="street" title="Please enter your street name.">
+    
+        <label for="city">City:</label>
+        <input type="text" id="city" name="city" title="Please enter your city name.">
+    
+        <label for="state">State:</label>
+        <input type="text" id="state" name="state" title="Please enter your state name.">
+    
+        <label for="country">Country:</label>
+        <input type="text" id="country" name="country" title="Please enter your country name.">
+    
+        <label for="loginId">Login ID:</label>
+        <input type="text" id="loginId" name="loginId" pattern="[a-zA-Z0-9]{8}" required title="Login ID must be exactly 8 alphanumeric characters.">
+    
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required title="Password must be at least 6 characters long, include an uppercase letter, a lowercase letter, and a special character.">
+    
+        <button type="submit">Signup</button>
+    </form>
+
+    <!-- User Login Section -->
+    <div id="loginContainer">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <input type="text" id="loginIdLogin" placeholder="Login ID" required>
+            <input type="password" id="passwordLogin" placeholder="Password" required>
+            <button type="submit">Sign In</button>
+        </form>
+        <div id="loginError" style="color: red;"></div>
+    </div>
+
+    <!-- Live Users Section -->
+    <div id="liveUsersContainer">
+        <h2>Live Users</h2>
+        <button id="showLiveUsers">Show Live Users</button>
+        <ul id="userList"></ul>
+    </div>
+
+    <!-- User Details Section -->
+    <div id="userDetails" style="display:none;">
+        <h2>User Details</h2>
+        <p id="detailsContent"></p>
+        <button id="closeDetails">Close</button>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const socket = io();
+            let liveUsers = {};
+
+            // Handle form submission
+            const handleFormSubmission = (form, url, successMessage, additionalData = {}) => {
+                const userData = $(form).serializeArray().reduce((obj, item) => {
+                    obj[item.name] = item.value;
+                    return obj;
+                }, {});
+                Object.assign(userData, additionalData);
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(userData),
+                    success: function() {
+                        alert(successMessage);
+                        $(form)[0].reset(); // Reset form fields after successful submission
+                    },
+                    error: function(xhr) {
+                        alert('Error: ' + xhr.responseText);
+                    }
+                });
+            };
+
+            // User registration
+            $('#userForm').on('submit', function(e) {
+                e.preventDefault();
+                handleFormSubmission(this, 'http://localhost:3000/api/users', 'User saved successfully!', { socketId: socket.id });
+                socket.emit('register', { ...$(this).serializeArray().reduce((obj, item) => {
+                    obj[item.name] = item.value;
+                    return obj;
+                }, {}), socketId: socket.id });
+            });
+
+            // Show live users
+            $('#showLiveUsers').on('click', function() {
+                const userList = $('#userList').empty(); // Clear existing user list
+                for (const socketId in liveUsers) {
+                    const user = liveUsers[socketId];
+                    userList.append(`<li class="user-item" data-socket-id="${socketId}">
+                        <span>${user.name}</span>
+                        <span>${socketId}</span>
+                        <span class="status online">Online</span>
+                    </li>`);
+                }
+            });
+
+            // Show user details
+            $(document).on('click', '.user-item', function() {
+                const socketId = $(this).data('socket-id');
+                $.ajax({
+                    url: `http://localhost:3000/api/users/${socketId}`,
+                    type: 'GET',
+                    success: function(user) {
+                        $('#detailsContent').html(`
+                            <strong>First Name:</strong> ${user.firstName}<br>
+                            <strong>Last Name:</strong> ${user.lastName}<br>
+                            <strong>Email:</strong> ${user.email}<br>
+                            <strong>Mobile No:</strong> ${user.mobileNo}<br>
+                            <strong>Address:</strong> ${user.address}, ${user.street}, ${user.city}, ${user.state}, ${user.country}<br>
+                        `);
+                        $('#userDetails').show();
+                    },
+                    error: function(xhr) {
+                        alert('Error fetching user details: ' + xhr.responseText);
+                    }
+                });
+            });
+
+            // Close user details
+            $('#closeDetails').on('click', function() {
+                $('#userDetails').hide();
+            });
+
+            // User login
+            $('#loginForm').on('submit', function(e) {
+                e.preventDefault();
+                const loginData = {
+                    loginId: $('#loginIdLogin').val(),
+                    password: $('#passwordLogin').val()
+                };
+
+                $.ajax({
+                    url: 'http://localhost:3000/api/login',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(loginData),
+                    success: function(response) {
+                        alert('Login successful!');
+                        $('#loginContainer').hide();
+                        socket.emit('joinLiveUsers', { socketId: socket.id, userName: response.user.name });
+                        $('#liveUsersContainer').prepend(`<div>Welcome, ${response.user.name}!</div>`);
+                    },
+                    error: function(xhr) {
+                        $('#loginError').text(xhr.responseJSON.error || 'Login failed.');
+                    }
+                });
+            });
+
+            // Socket.io connection
+            socket.on('updateUserList', function(updatedLiveUsers) {
+                liveUsers = updatedLiveUsers; // Update the local liveUsers object
+            });
+        });
+    </script>
+</body>
+</html>
