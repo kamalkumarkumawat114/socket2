@@ -10,42 +10,42 @@
 </head>
 <body>
     <h1>User Registration</h1>
-    
+
     <!-- User Registration Form -->
-    <form id="userForm">
+    <form id="userForm" novalidate>
         <label for="firstName">First Name:</label>
-        <input type="text" id="firstName" name="firstName" required title="Please enter your first name.">
-    
+        <input type="text" id="firstName" name="firstName" required title="Please enter your first name." pattern="[A-Za-z\s\-]+">
+
         <label for="lastName">Last Name:</label>
-        <input type="text" id="lastName" name="lastName" required title="Please enter your last name.">
-    
+        <input type="text" id="lastName" name="lastName" required title="Please enter your last name." pattern="[A-Za-z\s\-]+">
+
         <label for="mobileNo">Mobile No:</label>
-        <input type="text" id="mobileNo" name="mobileNo" pattern="\d{10}" required title="Please enter a valid 10-digit mobile number.">
-    
+        <input type="text" id="mobileNo" name="mobileNo" required title="Please enter a valid 10-digit mobile number." pattern="\d{10}">
+
         <label for="email">Email ID:</label>
         <input type="email" id="email" name="email" required title="Please enter a valid email address.">
-    
+
         <label for="address">Address:</label>
         <input type="text" id="address" name="address" title="Please enter your address.">
-    
+
         <label for="street">Street:</label>
-        <input type="text" id="street" name="street" title="Please enter your street name.">
-    
+        <input type="text" id="street" name="street" required title="Please enter your street name.">
+
         <label for="city">City:</label>
-        <input type="text" id="city" name="city" title="Please enter your city name.">
-    
+        <input type="text" id="city" name="city" required title="Please enter your city name." pattern="[A-Za-z\s\-]+">
+
         <label for="state">State:</label>
-        <input type="text" id="state" name="state" title="Please enter your state name.">
-    
+        <input type="text" id="state" name="state" required title="Please enter your state name." pattern="[A-Za-z\s\-]+">
+
         <label for="country">Country:</label>
-        <input type="text" id="country" name="country" title="Please enter your country name.">
-    
+        <input type="text" id="country" name="country" required title="Please enter your country name." pattern="[A-Za-z\s\-]+">
+
         <label for="loginId">Login ID:</label>
-        <input type="text" id="loginId" name="loginId" pattern="[a-zA-Z0-9]{8}" required title="Login ID must be exactly 8 alphanumeric characters.">
-    
+        <input type="text" id="loginId" name="loginId" required title="Login ID must be exactly 8 alphanumeric characters." pattern="[a-zA-Z0-9]{8}">
+
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required title="Password must be at least 6 characters long, include an uppercase letter, a lowercase letter, and a special character.">
-    
+        <input type="password" id="password" name="password" required title="Password must include uppercase, lowercase, number, and special character." minlength="6">
+
         <button type="submit">Signup</button>
     </form>
 
@@ -79,51 +79,125 @@
             const socket = io();
             let liveUsers = {};
 
-            // Handle form submission
-            const handleFormSubmission = (form, url, successMessage, additionalData = {}) => {
-                const userData = $(form).serializeArray().reduce((obj, item) => {
+            // User registration
+            $('#userForm').on('submit', function(e) {
+                e.preventDefault();
+                const invalidFields = [];
+
+                // Manual validation
+                const firstName = $('#firstName').val();
+                const lastName = $('#lastName').val();
+                const mobileNo = $('#mobileNo').val();
+                const email = $('#email').val();
+                const street = $('#street').val();
+                const city = $('#city').val();
+                const state = $('#state').val();
+                const country = $('#country').val();
+                const loginId = $('#loginId').val();
+                const password = $('#password').val();
+
+
+if (!firstName) invalidFields.push("First Name is required.");
+else if (/[\d]/.test(firstName)) {
+    invalidFields.push("First Name must not contain numeric values.");
+}
+
+if (!lastName) invalidFields.push("Last Name is required.");
+else if (/[\d]/.test(lastName)) {
+    invalidFields.push("Last Name must not contain numeric values.");
+}
+
+if (!/^\d{10}$/.test(mobileNo)) invalidFields.push("Mobile No must be a valid 10-digit number.");
+if (!/\S+@\S+\.\S+/.test(email)) invalidFields.push("Email ID must be a valid email address.");
+if (!street) invalidFields.push("Street is required.");
+if (!city) invalidFields.push("City is required.");
+
+if (!state) {
+    invalidFields.push("State is required.");
+} else if (/[\d]/.test(state)) {
+    invalidFields.push("State must not contain numeric values.");
+}
+
+if (!country) {
+    invalidFields.push("Country is required.");
+} else if (/[\d]/.test(country)) {
+    invalidFields.push("Country must not contain numeric values.");
+}
+
+if (!/^[a-zA-Z0-9]{8}$/.test(loginId)) invalidFields.push("Login ID must be exactly 8 alphanumeric characters.");
+if (!/.{8,}/.test(password) || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[!@#$%^&*]/.test(password)) {
+    invalidFields.push("Password must include uppercase, lowercase, number, and special character.");
+}
+
+
+                if (invalidFields.length > 0) {
+                    alert('Please fill out the following fields correctly:\n- ' + invalidFields.join('\n- '));
+                    return;
+                }
+
+                const userData = $(this).serializeArray().reduce((obj, item) => {
                     obj[item.name] = item.value;
                     return obj;
                 }, {});
-                Object.assign(userData, additionalData);
+                userData.socketId = socket.id;
 
                 $.ajax({
-                    url: url,
+                    url: 'http://localhost:3000/api/users',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(userData),
                     success: function() {
-                        alert(successMessage);
-                        $(form)[0].reset(); // Reset form fields after successful submission
+                        alert('User saved successfully!');
+                        $('#userForm')[0].reset();
                     },
                     error: function(xhr) {
-                        alert('Error: ' + xhr.responseText);
+                        const errorMessage = xhr.responseJSON?.error || 'An error occurred.';
+                        alert('Error: ' + errorMessage);
                     }
                 });
-            };
+            });
 
-            // User registration
-            $('#userForm').on('submit', function(e) {
+            // User login
+            $('#loginForm').on('submit', function(e) {
                 e.preventDefault();
-                handleFormSubmission(this, 'http://localhost:3000/api/users', 'User saved successfully!', { socketId: socket.id });
-                socket.emit('register', { ...$(this).serializeArray().reduce((obj, item) => {
-                    obj[item.name] = item.value;
-                    return obj;
-                }, {}), socketId: socket.id });
+                const loginData = {
+                    loginId: $('#loginIdLogin').val(),
+                    password: $('#passwordLogin').val()
+                };
+
+                $.ajax({
+                    url: 'http://localhost:3000/api/login',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(loginData),
+                    success: function(response) {
+                        alert('Login successful!');
+                        $('#loginContainer').hide();
+                        socket.emit('joinLiveUsers', { socketId: socket.id, userName: response.user.name });
+                        $('#liveUsersContainer').prepend(`<div>Welcome, ${response.user.name}!</div>`);
+                    },
+                    error: function(xhr) {
+                        $('#loginError').text(xhr.responseJSON.error || 'Login failed.');
+                    }
+                });
             });
 
             // Show live users
-            $('#showLiveUsers').on('click', function() {
-                const userList = $('#userList').empty(); // Clear existing user list
-                for (const socketId in liveUsers) {
-                    const user = liveUsers[socketId];
-                    userList.append(`<li class="user-item" data-socket-id="${socketId}">
-                        <span>${user.name}</span>
-                        <span>${socketId}</span>
-                        <span class="status online">Online</span>
-                    </li>`);
-                }
-            });
+            const updateUserListDisplay = () => {
+             const userList = $('#userList').empty();
+             for (const socketId in liveUsers) {
+        const user = liveUsers[socketId];
+        const status = user.online ? 'Online' : 'Offline'; // Track online/offline status
+        userList.append(`<li class="user-item" data-socket-id="${socketId}">
+            <span>${user.name}</span>
+            <span>${socketId}</span>
+            <span class="status ${user.online ? 'online' : 'offline'}">${status}</span>
+        </li>`);
+             }
+         };  
+         $('#showLiveUsers').on('click', function() {
+    updateUserListDisplay(); // Call the function to update the display
+});       
 
             // Show user details
             $(document).on('click', '.user-item', function() {
@@ -152,35 +226,28 @@
                 $('#userDetails').hide();
             });
 
-            // User login
-            $('#loginForm').on('submit', function(e) {
-                e.preventDefault();
-                const loginData = {
-                    loginId: $('#loginIdLogin').val(),
-                    password: $('#passwordLogin').val()
-                };
+            // Socket.io connection updates
+         // Socket.io connection updates
+socket.on('userLoggedIn', function(user) {
+    liveUsers[user.socketId] = {
+        email: user.email,
+        name: user.name,
+        online: true,
+    };
+    updateUserListDisplay(); // Update display when a user logs in
+});
 
-                $.ajax({
-                    url: 'http://localhost:3000/api/login',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(loginData),
-                    success: function(response) {
-                        alert('Login successful!');
-                        $('#loginContainer').hide();
-                        socket.emit('joinLiveUsers', { socketId: socket.id, userName: response.user.name });
-                        $('#liveUsersContainer').prepend(`<div>Welcome, ${response.user.name}!</div>`);
-                    },
-                    error: function(xhr) {
-                        $('#loginError').text(xhr.responseJSON.error || 'Login failed.');
-                    }
-                });
-            });
-
-            // Socket.io connection
-            socket.on('updateUserList', function(updatedLiveUsers) {
-                liveUsers = updatedLiveUsers; // Update the local liveUsers object
-            });
+socket.on('updateUserList', function(updatedLiveUsers) {
+    liveUsers = updatedLiveUsers;
+    updateUserListDisplay(); // Update display with new user list
+});
+// Handle user disconnection
+socket.on('userDisconnected', function(socketId) {
+    if (liveUsers[socketId]) {
+        liveUsers[socketId].online = false; // Set user to offline
+        updateUserListDisplay(); // Update the display
+    }
+});
         });
     </script>
 </body>
