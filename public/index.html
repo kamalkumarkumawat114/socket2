@@ -4,251 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Registration</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="style.css">
+   
 </head>
 <body>
-    <h1>User Registration</h1>
+    <div class="container">
+        <h1>User Registration</h1>
+        <form id="registerForm">
+            <input type="text" id="firstName" placeholder="First Name">
+            <span class="error" id="firstNameError"></span>
 
-    <!-- User Registration Form -->
-    <form id="userForm" novalidate>
-        <label for="firstName">First Name:</label>
-        <input type="text" id="firstName" name="firstName" required title="Please enter your first name." pattern="[A-Za-z\s\-]+">
+            <input type="text" id="lastName" placeholder="Last Name">
+            <span class="error" id="lastNameError"></span>
 
-        <label for="lastName">Last Name:</label>
-        <input type="text" id="lastName" name="lastName" required title="Please enter your last name." pattern="[A-Za-z\s\-]+">
+            <input type="text" id="mobile" placeholder="Mobile Number">
+            <span class="error" id="mobileError"></span>
 
-        <label for="mobileNo">Mobile No:</label>
-        <input type="text" id="mobileNo" name="mobileNo" required title="Please enter a valid 10-digit mobile number." pattern="\d{10}">
+            <input type="email" id="email" placeholder="Email ID">
+            <span class="error" id="emailError"></span>
 
-        <label for="email">Email ID:</label>
-        <input type="email" id="email" name="email" required title="Please enter a valid email address.">
+            <input type="text" id="address" placeholder="Address">
+            <span class="error" id="addressError"></span>
 
-        <label for="address">Address:</label>
-        <input type="text" id="address" name="address" title="Please enter your address.">
+            <input type="text" id="city" placeholder="City">
+            <span class="error" id="cityError"></span>
 
-        <label for="street">Street:</label>
-        <input type="text" id="street" name="street" required title="Please enter your street name.">
+            <input type="text" id="state" placeholder="State">
+            <span class="error" id="stateError"></span>
 
-        <label for="city">City:</label>
-        <input type="text" id="city" name="city" required title="Please enter your city name." pattern="[A-Za-z\s\-]+">
+            <input type="text" id="country" placeholder="Country">
+            <span class="error" id="countryError"></span>
 
-        <label for="state">State:</label>
-        <input type="text" id="state" name="state" required title="Please enter your state name." pattern="[A-Za-z\s\-]+">
+            <input type="text" id="loginID" placeholder="Login ID (8 characters)">
+            <span class="error" id="loginIDError"></span>
 
-        <label for="country">Country:</label>
-        <input type="text" id="country" name="country" required title="Please enter your country name." pattern="[A-Za-z\s\-]+">
+            <input type="password" id="password" placeholder="Password (min 8 characters)">
+            <span class="error" id="passwordError"></span>
 
-        <label for="loginId">Login ID:</label>
-        <input type="text" id="loginId" name="loginId" required title="Login ID must be exactly 8 alphanumeric characters." pattern="[a-zA-Z0-9]{8}">
-
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required title="Password must include uppercase, lowercase, number, and special character." minlength="6">
-
-        <button type="submit">Signup</button>
-    </form>
-
-    <!-- User Login Section -->
-    <div id="loginContainer">
-        <h2>Login</h2>
-        <form id="loginForm">
-            <input type="text" id="loginIdLogin" placeholder="Login ID" required>
-            <input type="password" id="passwordLogin" placeholder="Password" required>
-            <button type="submit">Sign In</button>
+            <button type="submit">Register</button>
         </form>
-        <div id="loginError" style="color: red;"></div>
-    </div>
 
-    <!-- Live Users Section -->
-    <div id="liveUsersContainer">
         <h2>Live Users</h2>
-        <button id="showLiveUsers">Show Live Users</button>
-        <ul id="userList"></ul>
+        <table>
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Socket ID</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="liveUsers"></tbody>
+        </table>
+        <!-- Modal Structure for User Details -->
+<div id="userDetailsModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div id="userDetails"></div>
+    </div>
+  </div>
+  
+
+
+        <div id="successMessage"></div>
     </div>
 
-    <!-- User Details Section -->
-    <div id="userDetails" style="display:none;">
-        <h2>User Details</h2>
-        <p id="detailsContent"></p>
-        <button id="closeDetails">Close</button>
-    </div>
-
-    <script>
-        $(document).ready(function() {
-            const socket = io();
-            let liveUsers = {};
-
-            // User registration
-            $('#userForm').on('submit', function(e) {
-                e.preventDefault();
-                const invalidFields = [];
-
-                // Manual validation
-                const firstName = $('#firstName').val();
-                const lastName = $('#lastName').val();
-                const mobileNo = $('#mobileNo').val();
-                const email = $('#email').val();
-                const street = $('#street').val();
-                const city = $('#city').val();
-                const state = $('#state').val();
-                const country = $('#country').val();
-                const loginId = $('#loginId').val();
-                const password = $('#password').val();
-
-
-if (!firstName) invalidFields.push("First Name is required.");
-else if (/[\d]/.test(firstName)) {
-    invalidFields.push("First Name must not contain numeric values.");
-}
-
-if (!lastName) invalidFields.push("Last Name is required.");
-else if (/[\d]/.test(lastName)) {
-    invalidFields.push("Last Name must not contain numeric values.");
-}
-
-if (!/^\d{10}$/.test(mobileNo)) invalidFields.push("Mobile No must be a valid 10-digit number.");
-if (!/\S+@\S+\.\S+/.test(email)) invalidFields.push("Email ID must be a valid email address.");
-if (!street) invalidFields.push("Street is required.");
-if (!city) invalidFields.push("City is required.");
-
-if (!state) {
-    invalidFields.push("State is required.");
-} else if (/[\d]/.test(state)) {
-    invalidFields.push("State must not contain numeric values.");
-}
-
-if (!country) {
-    invalidFields.push("Country is required.");
-} else if (/[\d]/.test(country)) {
-    invalidFields.push("Country must not contain numeric values.");
-}
-
-if (!/^[a-zA-Z0-9]{8}$/.test(loginId)) invalidFields.push("Login ID must be exactly 8 alphanumeric characters.");
-if (!/.{8,}/.test(password) || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[!@#$%^&*]/.test(password)) {
-    invalidFields.push("Password must include uppercase, lowercase, number, and special character.");
-}
-
-
-                if (invalidFields.length > 0) {
-                    alert('Please fill out the following fields correctly:\n- ' + invalidFields.join('\n- '));
-                    return;
-                }
-
-                const userData = $(this).serializeArray().reduce((obj, item) => {
-                    obj[item.name] = item.value;
-                    return obj;
-                }, {});
-                userData.socketId = socket.id;
-
-                $.ajax({
-                    url: 'http://localhost:3000/api/users',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(userData),
-                    success: function() {
-                        alert('User saved successfully!');
-                        $('#userForm')[0].reset();
-                    },
-                    error: function(xhr) {
-                        const errorMessage = xhr.responseJSON?.error || 'An error occurred.';
-                        alert('Error: ' + errorMessage);
-                    }
-                });
-            });
-
-            // User login
-            $('#loginForm').on('submit', function(e) {
-                e.preventDefault();
-                const loginData = {
-                    loginId: $('#loginIdLogin').val(),
-                    password: $('#passwordLogin').val()
-                };
-
-                $.ajax({
-                    url: 'http://localhost:3000/api/login',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(loginData),
-                    success: function(response) {
-                        alert('Login successful!');
-                        $('#loginContainer').hide();
-                        socket.emit('joinLiveUsers', { socketId: socket.id, userName: response.user.name });
-                        $('#liveUsersContainer').prepend(`<div>Welcome, ${response.user.name}!</div>`);
-                    },
-                    error: function(xhr) {
-                        $('#loginError').text(xhr.responseJSON.error || 'Login failed.');
-                    }
-                });
-            });
-
-            // Show live users
-            const updateUserListDisplay = () => {
-             const userList = $('#userList').empty();
-             for (const socketId in liveUsers) {
-        const user = liveUsers[socketId];
-        const status = user.online ? 'Online' : 'Offline'; // Track online/offline status
-        userList.append(`<li class="user-item" data-socket-id="${socketId}">
-            <span>${user.name}</span>
-            <span>${socketId}</span>
-            <span class="status ${user.online ? 'online' : 'offline'}">${status}</span>
-        </li>`);
-             }
-         };  
-         $('#showLiveUsers').on('click', function() {
-    updateUserListDisplay(); // Call the function to update the display
-});       
-
-            // Show user details
-            $(document).on('click', '.user-item', function() {
-                const socketId = $(this).data('socket-id');
-                $.ajax({
-                    url: `http://localhost:3000/api/users/${socketId}`,
-                    type: 'GET',
-                    success: function(user) {
-                        $('#detailsContent').html(`
-                            <strong>First Name:</strong> ${user.firstName}<br>
-                            <strong>Last Name:</strong> ${user.lastName}<br>
-                            <strong>Email:</strong> ${user.email}<br>
-                            <strong>Mobile No:</strong> ${user.mobileNo}<br>
-                            <strong>Address:</strong> ${user.address}, ${user.street}, ${user.city}, ${user.state}, ${user.country}<br>
-                        `);
-                        $('#userDetails').show();
-                    },
-                    error: function(xhr) {
-                        alert('Error fetching user details: ' + xhr.responseText);
-                    }
-                });
-            });
-
-            // Close user details
-            $('#closeDetails').on('click', function() {
-                $('#userDetails').hide();
-            });
-
-            // Socket.io connection updates
-         // Socket.io connection updates
-socket.on('userLoggedIn', function(user) {
-    liveUsers[user.socketId] = {
-        email: user.email,
-        name: user.name,
-        online: true,
-    };
-    updateUserListDisplay(); // Update display when a user logs in
-});
-
-socket.on('updateUserList', function(updatedLiveUsers) {
-    liveUsers = updatedLiveUsers;
-    updateUserListDisplay(); // Update display with new user list
-});
-// Handle user disconnection
-socket.on('userDisconnected', function(socketId) {
-    if (liveUsers[socketId]) {
-        liveUsers[socketId].online = false; // Set user to offline
-        updateUserListDisplay(); // Update the display
-    }
-});
-        });
-    </script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
