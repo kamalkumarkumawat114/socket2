@@ -1,0 +1,142 @@
+/* Flipkart-inspired theme */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background-color: #f1f3f6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px; /* for small screens */
+}
+
+.container {
+  width: 600px;
+  max-width: 400px;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  text-align: center;
+}
+
+h2 {
+  font-size: 24px;
+  color: #2874f0;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  color: #333;
+}
+
+input:focus {
+  border-color: #2874f0;
+  outline: none;
+  box-shadow: 0px 0px 5px rgba(40, 116, 240, 0.3);
+}
+
+#saveButton {
+  width: 100%;
+  padding: 12px;
+  background-color: #2874f0;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+Button {
+  /* width: 100%; */
+  padding: 12px;
+  background-color: #2874f0;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#saveButton:hover {
+  background-color: #1a5ab7;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .container {
+      padding: 15px;
+  }
+
+  h2 {
+      font-size: 20px;
+      margin-bottom: 15px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+      padding: 8px;
+      font-size: 13px;
+  }
+
+  #saveButton {
+      padding: 10px;
+      font-size: 15px;
+  }
+}
+
+@media (max-width: 400px) {
+  body {
+      padding: 10px;
+  }
+
+  .container {
+      padding: 10px;
+      box-shadow: none; /* Remove shadow on very small screens */
+  }
+
+  h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+      padding: 7px;
+      font-size: 12px;
+  }
+
+  #saveButton {
+      padding: 8px;
+      font-size: 14px;
+  }
+}
