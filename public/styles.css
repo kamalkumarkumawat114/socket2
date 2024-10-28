@@ -1,79 +1,142 @@
+/* Flipkart-inspired theme */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    margin: 0;
-    padding: 20px;
-  }
-  
+  background-color: #f1f3f6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px; /* for small screens */
+}
+
+.container {
+  width: 600px;
+  max-width: 400px;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  text-align: center;
+}
+
+h2 {
+  font-size: 24px;
+  color: #2874f0;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  color: #333;
+}
+
+input:focus {
+  border-color: #2874f0;
+  outline: none;
+  box-shadow: 0px 0px 5px rgba(40, 116, 240, 0.3);
+}
+
+#saveButton {
+  width: 100%;
+  padding: 12px;
+  background-color: #2874f0;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+Button {
+  /* width: 100%; */
+  padding: 12px;
+  background-color: #2874f0;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#saveButton:hover {
+  background-color: #1a5ab7;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
   .container {
-    width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 15px;
   }
-  
-  input {
-    width: 100%;
-    padding: 8px;
-    margin: 10px 0;
-    border-radius: 4px;
-    border: 1px solid #ddd;
+
+  h2 {
+      font-size: 20px;
+      margin-bottom: 15px;
   }
-  
-  button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+      padding: 8px;
+      font-size: 13px;
   }
-  
-  .live-users {
-    margin-top: 40px;
+
+  #saveButton {
+      padding: 10px;
+      font-size: 15px;
   }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
+}
+
+@media (max-width: 400px) {
+  body {
+      padding: 10px;
   }
-  
-  table, th, td {
-    border: 1px solid #ddd;
+
+  .container {
+      padding: 10px;
+      box-shadow: none; /* Remove shadow on very small screens */
   }
-  
-  th, td {
-    padding: 10px;
-    text-align: left;
+
+  h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
   }
-  
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+      padding: 7px;
+      font-size: 12px;
   }
-  
-  .modal-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    position: relative;
+
+  #saveButton {
+      padding: 8px;
+      font-size: 14px;
   }
-  
-  .close {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    font-size: 18px;
-    cursor: pointer;
-  }
-  
+}
