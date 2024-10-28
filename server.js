@@ -40,6 +40,26 @@ app.get('/api/users', async (req, res) => {
         res.status(500).send(err.message);
     }
 });
+app.post('/api/login', async (req, res) => {
+    try {
+        const { loginId, password } = req.body;
+        const user = await User.findOne({ loginId });
+
+        if (!user) {
+            return res.status(401).send('Invalid login credentials');
+        }
+
+        // You may want to hash passwords in a real application and compare hashes
+        if (user.password !== password) {
+            return res.status(401).send('Invalid login credentials');
+        }
+
+        res.json({ email: user.email, firstName: user.firstName });
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
 
 
 const liveUsers = new Map();
