@@ -48,9 +48,21 @@
 
         <button type="button" id="saveButton">Save</button>
     </form>
-    <div id="navigation" style="display:none;">
+    <h2>User Login</h2>
+<form class="form-group" id="loginForm">
+    <label for="loginId">Login ID:</label>
+    <input type="text" id="loginId" required>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" required>
+
+    <button type="button" id="loginButton">Login</button>
+</form>
+
+<button id="viewLiveUsersButton">View Live Users</button>
+    <!-- <div id="navigation" style="display:none;">
         <a href="liveusers.html" target="_blank">Go to Live Users</a>
-    </div>
+    </div> -->
 </div>
 
 
@@ -220,6 +232,34 @@
                     alert('Error: ' + error.responseText);
                 }
             });
+        });
+        $('#loginButton').on('click', function() {
+            const loginData = {
+                loginId: $('#loginId').val(),
+                password: $('#password').val()
+            };
+
+            $.ajax({
+                url: '/api/login', // Change this to your login API endpoint
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(loginData),
+                success: function(response) {
+                    alert('Login successful');
+                    // Emit socket event for the logged-in user
+                    const socket = io();
+                    socket.emit('joinRoom', { email: response.email, name: response.firstName });
+                    $('#navigation').show();
+                },
+                error: function(error) {
+                    alert('Error: ' + error.responseText);
+                }
+            });
+        });
+
+        // Handle View Live Users button click
+        $('#viewLiveUsersButton').on('click', function() {
+            window.location.href = 'liveusers.html'; // Redirect to Live Users page
         });
     });
     </script>
